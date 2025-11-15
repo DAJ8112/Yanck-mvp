@@ -136,7 +136,19 @@ class ChatInterface {
         if (sources && sources.length > 0) {
             const sourcesDiv = document.createElement('div');
             sourcesDiv.className = 'message-sources';
-            sourcesDiv.textContent = `Sources: ${sources.join(', ')}`;
+            
+            // Format sources properly
+            const sourcesList = sources.map(source => {
+                if (typeof source === 'object' && source.filename) {
+                    return `${source.filename}`;
+                }
+                return source;
+            });
+            
+            // Remove duplicates
+            const uniqueSources = [...new Set(sourcesList)];
+            
+            sourcesDiv.textContent = `Sources: ${uniqueSources.join(', ')}`;
             messageContent.appendChild(sourcesDiv);
         }
         

@@ -43,19 +43,18 @@
                     <span class="error-message" id="name-error"></span>
                 </div>
 
-                <!-- System Prompt -->
+                <!-- Special Instructions (Optional) -->
                 <div class="form-group">
-                    <label for="system-prompt">System Prompt <span class="required">*</span></label>
+                    <label for="special-instructions">Special Instructions (Optional)</label>
                     <textarea
-                        id="system-prompt"
-                        name="system_prompt"
-                        rows="6"
-                        placeholder="e.g., You are a helpful customer support assistant. Answer questions based on the provided documentation. Be concise and professional."
-                        required
-                        maxlength="1000"
+                        id="special-instructions"
+                        name="special_instructions"
+                        rows="4"
+                        placeholder="e.g., Focus on customer support, be professional and concise, use friendly tone..."
+                        maxlength="500"
                     ></textarea>
-                    <span class="help-text">Define how your chatbot should behave and respond to users</span>
-                    <span class="error-message" id="prompt-error"></span>
+                    <span class="help-text">Provide any specific instructions for your chatbot's behavior (we'll generate an optimized system prompt for you)</span>
+                    <span class="error-message" id="instructions-error"></span>
                 </div>
 
                 <!-- File Upload Section -->
@@ -107,5 +106,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/wizard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wizard_step1.js') }}"></script>
 {% endblock %}

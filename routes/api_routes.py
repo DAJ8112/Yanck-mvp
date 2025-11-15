@@ -648,6 +648,160 @@ def update_chatbot(chatbot_id):
         }), 500
 
 
+@api_bp.route('/test-gemini', methods=['GET'])
+def test_gemini():
+    """Test Gemini API connectivity and list available models."""
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=current_app.config['GEMINI_API_KEY'])
+        
+        # List available models
+        available_models = []
+        for model in genai.list_models():
+            if 'generateContent' in model.supported_generation_methods:
+                available_models.append(model.name)
+        
+        # Test with the first available model
+        if available_models:
+            test_model_name = available_models[0].replace('models/', '')
+            model = genai.GenerativeModel(test_model_name)
+            response = model.generate_content('Say "Hello, API is working!"')
+            
+            return jsonify({
+                "success": True,
+                "message": "Gemini API is working",
+                "test_model": test_model_name,
+                "response": response.text,
+                "available_models": available_models
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "No models available for generateContent"
+            }), 500
+            
+    except Exception as e:
+        logger.error("Gemini API test failed: %s", str(e), exc_info=True)
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_bp.route('/generate-system-prompt', methods=['POST'])
+def generate_system_prompt():
+    """
+    Generate an optimized system prompt based on special instructions.
+
+    Request Body (JSON):
+        - special_instructions: Optional user instructions for chatbot behavior
+
+    Returns:
+        JSON response with generated system prompt (200 OK)
+        or error message (400 Bad Request, 503 Service Unavailable, 500 Internal Server Error)
+
+    Example:
+        POST /api/generate-system-prompt
+        {
+            "special_instructions": "Focus on customer support, be professional"
+        }
+    """
+    try:
+        # Check if query service is available
+        query_service = current_app.query_service
+        if query_service is None:
+            return jsonify({
+                "error": {
+                    "code": "SERVICE_UNAVAILABLE",
+                    "message": "Query service is not available. Gemini API key may not be configured."
+                }
+            }), 503
+
+        # Validate request has JSON content
+        if not request.is_json:
+            return jsonify({
+                "error": {
+                    "code": "INVALID_REQUEST",
+                    "message": "Request must be JSON"
+                }
+            }), 400
+
+        data = request.get_json()
+        special_instructions = data.get('special_instructions', '').strip()
+
+        # Generate system prompt
+        if special_instructions:
+            # Use LLM to generate tailored prompt
+            prompt = f"""You are an expert at creating effective system prompts for RAG (Retrieval-Augmented Generation) chatbots.
+
+Create a comprehensive and effective system prompt based on the following user requirements:
+
+User's Special Instructions:
+{special_instructions}
+
+Your task is to generate an ideal system prompt that:
+1. Incorporates the user's special instructions naturally and effectively
+2. Emphasizes providing in-depth, detailed, and specific answers
+3. Instructs the chatbot to answer based on the provided documents/knowledge base if the query requires so.
+4. Encourages thoroughness and accuracy in responses
+5. Sets a professional and helpful tone
+6. Includes guidance on how to handle questions (be specific, provide examples when relevant)
+
+The system prompt should be 4-8 sentences long and create a strong foundation for an intelligent, helpful chatbot.
+
+Do not include any preamble, explanation, or meta-commentary. Return ONLY the system prompt itself.
+
+System Prompt:"""
+
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=current_app.config['GEMINI_API_KEY'])
+                
+                # Use gemini-2.5-flash (same as chatbot queries)
+                model = genai.GenerativeModel('gemini-2.5-flash')
+                response = model.generate_content(prompt)
+                
+                system_prompt = response.text.strip()
+                logger.info("Successfully generated system prompt using LLM (gemini-2.5-flash)")
+            except Exception as e:
+                logger.error("Error generating system prompt with LLM: %s", str(e), exc_info=True)
+                # Fallback to template-based generation
+                logger.info("Using fallback template for system prompt generation")
+                system_prompt = f"""You are a knowledgeable AI assistant designed to provide in-depth, detailed answers. {special_instructions} 
+
+Always base your responses on the provided documents and knowledge base. Provide specific information, and give comprehensive explanations. When answering questions, be thorough and include relevant details, examples, or context that helps the user fully understand the topic. Maintain a professional and helpful tone throughout all interactions."""
+        else:
+            # Default system prompt - comprehensive and emphasizes depth
+            system_prompt = """You are a knowledgeable AI assistant designed to provide in-depth, detailed, and accurate answers based on the provided documents and knowledge base.
+
+When responding to questions:
+- Provide comprehensive and specific information rather than brief or generic answers
+- Include relevant details, examples, and context to help users fully understand the topic
+- If a question requires multiple aspects to be addressed, cover all of them thoroughly
+- Be thorough in your explanations and avoid superficial responses
+- Maintain a professional, clear, and helpful tone
+- If information is not available in the provided documents, clearly state this rather than speculating
+
+Your goal is to be as helpful and informative as possible while staying accurate to the source material."""
+            
+            logger.info("Generated default system prompt")
+
+        return jsonify({
+            "success": True,
+            "system_prompt": system_prompt
+        }), 200
+
+    except Exception as e:
+        logger.error("Error generating system prompt: %s", str(e))
+        return jsonify({
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "Failed to generate system prompt",
+                "details": str(e) if current_app.config.get('ENV') == 'development' else None
+            }
+        }), 500
+
+
 @api_bp.route('/chatbot/<chatbot_id>', methods=['DELETE'])
 def delete_chatbot(chatbot_id):
     """
