@@ -803,6 +803,81 @@ Your goal is to be as helpful and informative as possible while staying accurate
         }), 500
 
 
+@api_bp.route('/chatbot/<chatbot_id>/documents', methods=['GET'])
+def get_chatbot_documents(chatbot_id):
+    """
+    Get all documents for a specific chatbot.
+
+    URL Parameters:
+        - chatbot_id: Unique identifier of the chatbot
+
+    Returns:
+        JSON response with list of documents (200 OK)
+        or error message (404 Not Found, 500 Internal Server Error)
+
+    Example:
+        GET /api/chatbot/{chatbot_id}/documents
+    """
+    try:
+        # Verify chatbot exists
+        chatbot_service = current_app.chatbot_service
+        chatbot = chatbot_service.get_chatbot(chatbot_id)
+
+        if chatbot is None:
+            return jsonify({
+                "error": {
+                    "code": "NOT_FOUND",
+                    "message": f"Chatbot '{chatbot_id}' not found"
+                }
+            }), 404
+
+        # Get documents from database
+        from models.database import get_db_connection
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, filename, file_type, file_size, status, uploaded_at
+            FROM documents
+            WHERE chatbot_id = ?
+            ORDER BY uploaded_at DESC
+            """,
+            (chatbot_id,)
+        )
+
+        documents = []
+        for row in cursor.fetchall():
+            documents.append({
+                "id": row[0],
+                "filename": row[1],
+                "file_type": row[2],
+                "file_size": row[3],
+                "status": row[4],
+                "uploaded_at": row[5]
+            })
+
+        conn.close()
+
+        logger.info("Retrieved %d documents for chatbot '%s'", len(documents), chatbot_id)
+
+        return jsonify({
+            "success": True,
+            "documents": documents,
+            "count": len(documents)
+        }), 200
+
+    except Exception as e:
+        logger.error("Error retrieving documents for chatbot '%s': %s", chatbot_id, str(e))
+        return jsonify({
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "Failed to retrieve documents",
+                "details": str(e) if current_app.config.get('ENV') == 'development' else None
+            }
+        }), 500
+
+
 @api_bp.route('/chatbot/<chatbot_id>', methods=['DELETE'])
 def delete_chatbot(chatbot_id):
     """
@@ -867,5 +942,4 @@ def delete_chatbot(chatbot_id):
                 "code": "INTERNAL_ERROR",
                 "message": "Failed to delete chatbot",
                 "details": error_message if current_app.config.get('ENV') == 'development' else None
-            }
-        }), 500
+            }), 500
