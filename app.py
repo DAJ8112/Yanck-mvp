@@ -8,6 +8,7 @@ trained on user documents using RAG (Retrieval-Augmented Generation).
 import os
 import logging
 from flask import Flask, jsonify
+from flask_cors import CORS
 from dotenv import load_dotenv
 
 from models.embedding_manager import EmbeddingManager
@@ -34,6 +35,17 @@ def create_app():
         Configured Flask application instance
     """
     flask_app = Flask(__name__)
+
+    # Enable CORS for all routes
+    # In production, you should configure specific origins
+    CORS(flask_app, resources={
+        r"/api/*": {
+            "origins": ["http://localhost:3000", "http://localhost:3001"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
 
     # Flask configuration
     flask_app.config["SECRET_KEY"] = os.getenv(

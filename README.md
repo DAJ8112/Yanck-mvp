@@ -1,73 +1,66 @@
-# RAG Chatbot Platform
+# Yanck - RAG Chatbot Platform
 
-A Flask-based web application that enables users to create custom chatbots trained on their own documents using RAG (Retrieval-Augmented Generation).
+Build custom AI chatbots trained on your documents in minutes. Modern UI powered by Next.js + ShadCN, intelligent backend with Flask + Google Gemini.
 
-## Features
+## 🚀 Features
 
-- **Simple 4-Step Workflow**: Create chatbots in minutes
-  1. Basic Settings - Configure name and system prompt
-  2. Data Upload - Upload training documents (PDF, TXT, DOCX)
-  3. Preview & Test - Test your chatbot before deployment
-  4. Deploy - Make your chatbot live
+- **Modern UI**: Beautiful, responsive interface with ShadCN UI components
+- **4-Step Wizard**: Easy chatbot creation process
+- **Document Upload**: Support for PDF, DOCX, and TXT files
+- **RAG Pipeline**: Retrieval-Augmented Generation with FAISS + Google Gemini
+- **Real-time Chat**: Interactive messaging interface
+- **Dashboard**: Manage all your chatbots in one place
+- **AI-Powered**: Smart system prompt generation
+- **TypeScript**: Full type safety across the frontend
 
-- **Local Embedding Generation**: Uses Sentence Transformers for privacy-preserving document embeddings
-- **Powered by Google Gemini**: Leverages Gemini API for intelligent responses
-- **Multiple Document Support**: Upload up to 10 documents per chatbot (50MB each)
-- **RAG Pipeline**: Retrieves relevant context from your documents for accurate answers
+## 📋 Technology Stack
 
-## Technology Stack
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Modern utility-first styling
+- **ShadCN UI** - Beautiful, accessible components
+- **React Hook Form + Zod** - Form handling and validation
 
-- **Backend**: Flask, LangChain, Sentence Transformers, FAISS
-- **LLM**: Google Gemini API
-- **Database**: SQLite
-- **Frontend**: HTML, CSS, JavaScript
+### Backend
+- **Flask 3.0** - Python web framework
+- **LangChain** - RAG pipeline orchestration
+- **Google Gemini API** - Large language model
+- **FAISS** - Vector similarity search
+- **Sentence Transformers** - Local embeddings
+- **SQLite** - Database
 
-## Prerequisites
+## 🛠️ Prerequisites
 
-- Python 3.9 or higher
-- Google Gemini API key ([Get one here](https://makersuite.google.com/app/apikey))
+- **Node.js** 18+ and npm
+- **Python** 3.9+
+- **Google Gemini API Key** ([Get one here](https://makersuite.google.com/app/apikey))
 - 2GB+ RAM (for embedding model)
 
-## Installation
+## ⚡ Quick Start
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd rag-chatbot-platform
+git clone <your-repo-url>
+cd Yanck-mvp
 ```
 
-### 2. Create Virtual Environment
+### 2. Backend Setup
 
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
+# Install Python dependencies
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-
-Copy the example environment file and configure it:
+### 3. Configure Backend Environment
 
 ```bash
-# Windows
-copy .env.example .env
-
-# macOS/Linux
+# Create .env file
 cp .env.example .env
 ```
 
-Edit `.env` and set your configuration:
+Edit `.env` and add your Gemini API key:
 
 ```bash
 # Flask Configuration
@@ -94,96 +87,65 @@ VECTOR_STORE_PATH=./data/vector_stores
 DATABASE_PATH=./data/chatbots.db
 ```
 
-**Important**: You must set `GEMINI_API_KEY` for the application to work.
-
-### 5. Initialize Database
+### 4. Initialize Database
 
 ```bash
 python init_db.py
 ```
 
-### 6. Verify Setup (Optional)
-
-Run the verification script to check if everything is configured correctly:
-
-```bash
-python verify_setup.py
-```
-
-This will check:
-- Python version
-- Environment variables
-- Required packages
-- Application initialization
-
-## Running the Application
-
-### Quick Start (Recommended)
-
-Use the provided startup scripts:
-
-```bash
-# Windows
-start.bat
-
-# macOS/Linux
-chmod +x start.sh
-./start.sh
-```
-
-These scripts will:
-- Check for virtual environment
-- Check for .env file
-- Activate the environment
-- Start the application
-
-### Development Server
+### 5. Start Flask Backend
 
 ```bash
 python run.py
 ```
 
-The application will be available at `http://localhost:5000`
+Backend will run on `http://localhost:5000`
 
-### Alternative: Direct Flask Run
-
-```bash
-python app.py
-```
-
-### Custom Host/Port
-
-Set environment variables before running:
+### 6. Frontend Setup
 
 ```bash
-# Windows
-set FLASK_HOST=127.0.0.1
-set FLASK_PORT=8000
-python run.py
+# Navigate to frontend directory
+cd frontend
 
-# macOS/Linux
-export FLASK_HOST=127.0.0.1
-export FLASK_PORT=8000
-python run.py
+# Install dependencies
+npm install
+
+# Create .env.local file
+echo "NEXT_PUBLIC_API_URL=http://localhost:5000/api" > .env.local
+
+# Start Next.js dev server
+npm run dev
 ```
 
-## Usage
+Frontend will run on `http://localhost:3000`
 
-### Creating a Chatbot
+### 7. Open Your Browser
 
-1. Navigate to `http://localhost:5000`
-2. Click "Create New Chatbot"
-3. Follow the 4-step wizard:
-   - **Step 1**: Enter chatbot name and system prompt
-   - **Step 2**: Upload your documents (PDF, TXT, or DOCX)
-   - **Step 3**: Test your chatbot with sample queries
-   - **Step 4**: Deploy and get your chatbot URL
+Visit `http://localhost:3000` and start creating chatbots!
 
-### Chatting with Your Chatbot
+## 📖 Usage
 
-1. After deployment, you'll receive a unique chatbot URL
-2. Navigate to the URL (e.g., `http://localhost:5000/chat/<chatbot-id>`)
-3. Start asking questions based on your uploaded documents
+### Create a Chatbot
+
+1. Click **"Create Chatbot"** from the landing page or dashboard
+2. **Step 1**: Set name and system prompt (or use AI generation)
+3. **Step 2**: Upload your documents (PDF, DOCX, TXT)
+4. **Step 3**: Test your chatbot with sample questions
+5. **Step 4**: Deploy and start chatting!
+
+### Manage Chatbots
+
+- **Dashboard**: View all your chatbots
+- **Search**: Filter chatbots by name or description
+- **Delete**: Remove chatbots with confirmation
+- **Chat**: Click any chatbot to start a conversation
+
+### Chat Interface
+
+- Ask questions about your uploaded documents
+- View conversation history
+- See which documents are loaded
+- Get AI-powered responses based on your content
 
 ## Project Structure
 
