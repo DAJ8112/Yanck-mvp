@@ -2,6 +2,8 @@
 
 Build custom AI chatbots trained on your documents in minutes. Modern UI powered by Next.js + ShadCN, intelligent backend with Flask + Google Gemini.
 
+[See WHAT & WHY YANCK is ?](https://github.com/DAJ8112/Yanck-mvp/blob/main/What%20and%20Why%20Yanck.pdf)
+
 ## 🚀 Features
 
 - **Modern UI**: Beautiful, responsive interface with ShadCN UI components
